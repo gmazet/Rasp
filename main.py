@@ -172,6 +172,7 @@ CLOSE_STATIONS,MY_STATIONS=build_station_list(ev,provider)
 
 #MAXDIST=CLOSE_STATIONS['epidist_deg'][maxnbsta-1]
 #print "MAXDIST=%.1f degrees" % MAXDIST
+print MY_STATIONS
 
 if (MyOptions.mysta):
     print "Request only my selection of station..."

@@ -1,9 +1,9 @@
 from myutils import *
 
 my_stations=['R9F1B','RE4C0','R57C7','R0B29','RA3B7']
-my_stations=['R9F1B','R0B29','RA3B7']
-my_stations=['R9F1B','RDF31','R57C7','R4203']
-my_stations=['R9F1B','RDF31']
+my_stations=['RA007']
+my_stations=['R573E','RD51C','RA007','RB707']
+my_stations=['R9F1B','RDF31','R8F35','RE4C0','R57C7','R0B29','RA3B7']
 
 NODATA=('R6E96','R052F','R1FBA','RB511','SFD6B', 'RA70D','R9DA3','R5661','RE7F9','R9DBD','R3F3B','ILLF')
 
