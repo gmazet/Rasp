@@ -1,17 +1,5 @@
 from myutils import *
-
-my_stations=['R9F1B','RE4C0','R57C7','R0B29','RA3B7']
-my_stations=['RA007']
-my_stations=['R573E','RD51C','RA007','RB707']
-my_stations=['R9F1B','RDF31','R8F35','RE4C0','R57C7','R0B29','RA3B7']
-my_stations=['RA3B7','R57C7','R4203'] # PA, EC, Maconnais
-my_stations=['R9F1B','R8F35','RE4C0'] # GMR, BG, CM
-my_stations=['R9F1B','R8F35','RBFD5','RDF31'] # GMR, BG, NB, JPS
-my_stations=['R9F1B','RBFD5','RE4C0'] # GMR, NB, CM
-my_stations=['R9F1B','R8F35','RBFD5','RE4C0'] # GMR, BG, NB, CM
-my_stations=['R9F1B','RBFD5'] # GMR, NB
-
-NODATA=('R6E96','R052F','R1FBA','RB511','SFD6B', 'RA70D','R9DA3','R5661','RE7F9','R9DBD','R3F3B','ILLF','RA14B','R440A')
+from mysta import *
 
 HOST1="rtserve.resif.fr"
 HOST2="rtserve.iris.washington.edu"
