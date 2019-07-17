@@ -21,9 +21,6 @@ deg2km=(pi*Rearth)/180
 
 DATADIR="%s" % os.environ['TMP']
 
-def TIMESTAMP_TO_DATETIME(timestamp):
-    return datetime.datetime.fromtimestamp(timestamp+0.05)
-
 #----------------------------------------------------------------------
 class myEVID():
     def __init__(self):
@@ -61,7 +58,7 @@ class req_station:
         self.lat=0
         self.lon=0
         self.elevation=0
-        self.slserver="rtserve.iris.washington.edu"
+        self.slserver=""
 
     def get_epidist(self,epilat,epilon):
         D,Az1,Az2=gps2dist_azimuth(self.lat, self.lon, epilat, epilon)
