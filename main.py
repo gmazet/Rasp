@@ -17,7 +17,6 @@ def MyOptParser(parser):
     parser.add_option("--section", action="store_true", dest="section", default=False, help="Section plot")
     parser.add_option("--mysta", action="store_true", dest="mysta", default=False, help="Request custom list of stations")
     parser.add_option("--provider", action="store", dest="provider", default="rasp", help="Data provider [rasp]")
-    parser.add_option("--acc", action="store", dest="acc", default=0, help="Remove sensor response and convert to acceleration")
     (options, args) = parser.parse_args(args=None, values=None)
     return options
 
@@ -95,11 +94,6 @@ else:
     except:
         print "Missing parameters. Try --help"
         exit()
-
-if (MyOptions.acc != None):
-    acc=1
-else:
-    acc=0
 
 if (MyOptions.sig_length != None):
     sig_length=float(MyOptions.sig_length)
