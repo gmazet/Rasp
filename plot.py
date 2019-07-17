@@ -71,8 +71,8 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
 
         except:
             print ("WARNING: no response file found for station %s" % tr.station)
-            print ("\tDownload response file via Rasp webservice")
-            print ("\tExample:  curl -k 'https://fdsnws.raspberryshakedata.com/fdsnws/station/1/query?network=AM&station=RDF31&level=resp&format=sc3ml' -o RDF31.xml")
+            print ("\tDownload response file via associated webservice")
+            print ("\tExample with Raspberryshake webservice: curl -k 'https://fdsnws.raspberryshakedata.com/fdsnws/station/1/query?network=AM&station=RDF31&level=resp&format=sc3ml' -o RDF31.xml")
             pass
            
 
