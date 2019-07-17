@@ -1,15 +1,5 @@
 from optparse import OptionParser
 
-########################
-THISEVID=633319 #Delaware
-THISEVID=634492 # S. Calif
-THISEVID=635957 # Java
-THISEVID=630830 # St Jean de Maurienne
-THISEVID=639347 # Montenegro
-THISEVID=639343 # San Francisco
-########################
-
-
 #----------------------------------------------------------------
 def MyOptParser(parser):
     parser.add_option("--evid", action="store", dest="evid", help="Earthquake EVID")
@@ -26,9 +16,8 @@ def MyOptParser(parser):
     parser.add_option("--force", action="store_true", dest="force", default=False, help="Force requesting data instead of reading local miniseed file")
     parser.add_option("--section", action="store_true", dest="section", default=False, help="Section plot")
     parser.add_option("--mysta", action="store_true", dest="mysta", default=False, help="Request custom list of stations")
-    parser.add_option("--provider", action="store", dest="provider", default="resif", help="Data provider [resif]")
-    parser.add_option("--bokeh", action="store_true", dest="bokeh", default=False, help="Plot with Bokeh (html output)")
-    parser.add_option("--counts", action="store", dest="counts", default=0, help="peak-peak amplitude read as counts on the Rasp sensor")
+    parser.add_option("--provider", action="store", dest="provider", default="rasp", help="Data provider [rasp]")
+    parser.add_option("--acc", action="store", dest="acc", default=0, help="Remove sensor response and convert to acceleration")
     (options, args) = parser.parse_args(args=None, values=None)
     return options
 
@@ -39,10 +28,7 @@ except:
     print("Incorrect options. Try --help")
     exit(1)
 
-
 #-------------------------------------------------------------------
-from myutils import *
-from rasp_utils import *
 from fdsn import *
 from plot import *
     
@@ -55,7 +41,6 @@ if (MyOptions.evid != None):
         print "evid must be an integer"
         raise
 
-    from helper_tools import *
     url="http://www.seismicportal.eu/fdsnws/event/1/query?source_id=%d&format=json" % evid
     print "get url %s ..." % url
     res = geturl(url)
@@ -65,7 +50,7 @@ if (MyOptions.evid != None):
     ev.lat,ev.lon,ev.mag, ev.depth, ev.OT =  ev2['lat'], ev2['lon'], ev2['mag'],ev2['depth'],ev2['time']
     ev.region = ev2['flynn_region']
 
-    oritime=datetime.datetime.strptime(ev.OT, '%Y-%m-%dT%H:%M:%S.%fZ')
+    oritime=datetime.strptime(ev.OT, '%Y-%m-%dT%H:%M:%S.%fZ')
     unixtime=time.mktime(oritime.timetuple())
     ev.oritime=unixtime
 
@@ -101,7 +86,7 @@ else:
         ev.evid=evid
         ev.lat,ev.lon,ev.depth, ev.mag, ev.OT =  latitude, longitude, depth, magnitude, otime
         ev.region = ""
-        oritime=datetime.datetime.strptime(ev.OT, '%Y-%m-%dT%H:%M:%S.%fZ')
+        oritime=datetime.strptime(ev.OT, '%Y-%m-%dT%H:%M:%S.%fZ')
         unixtime=time.mktime(oritime.timetuple())
         ev.oritime=unixtime
 
@@ -111,10 +96,10 @@ else:
         print "Missing parameters. Try --help"
         exit()
 
-if (MyOptions.counts != None):
-    counts=MyOptions.counts
+if (MyOptions.acc != None):
+    acc=1
 else:
-    counts=0
+    acc=0
 
 if (MyOptions.sig_length != None):
     sig_length=float(MyOptions.sig_length)
@@ -143,11 +128,17 @@ if (MyOptions.maxnbsta != None):
 else:
     maxnbsta=3
 
+if (MyOptions.provider):
+    provider=MyOptions.provider
+if (provider not in ['rasp','resif']):
+    print "Take default provider (Raspberryshake)"
+    provider='rasp'
+
 #-------------------------------------
 print "===================================="
 print "Magnitude: %3.1f" % ev.mag
 print "Region: %s" % ev.region
-print "Origin time: %s" % TIMESTAMP_TO_DATETIME(ev.oritime)
+print "Origin time: %s" % datetime.fromtimestamp(ev.oritime)
 print "Coord: %.2f %.2f" % (ev.lat,ev.lon)
 print "Depth: %d km" % ev.depth
 print "===================================="
@@ -163,15 +154,8 @@ from obspy.core import read, AttribDict
 from obspy.taup import TauPyModel
 model=TauPyModel(model='ak135')
 
-if (MyOptions.provider):
-    provider=MyOptions.provider
-else:
-    provider="resif"
-
 CLOSE_STATIONS,MY_STATIONS=build_station_list(ev,provider)
 
-#MAXDIST=CLOSE_STATIONS['epidist_deg'][maxnbsta-1]
-#print "MAXDIST=%.1f degrees" % MAXDIST
 print MY_STATIONS
 
 if (MyOptions.mysta):
@@ -181,9 +165,5 @@ if (MyOptions.mysta):
 else:
     phaseslist,allsta,arrtimes,alltraces=get_data(CLOSE_STATIONS,ev,model, MyOptions, maxnbsta, provider)
 
-if (MyOptions.bokeh):
-    bokeh_plot(ev,phaseslist, allsta,arrtimes, alltraces, model, MyOptions)
-else:
-    matplotlib_plot(ev,phaseslist, allsta,arrtimes, alltraces, model, MyOptions)
-
+matplotlib_plot(ev,phaseslist, allsta,arrtimes, alltraces, model, MyOptions, DATADIR)
 
