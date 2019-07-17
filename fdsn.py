@@ -1,6 +1,8 @@
 from rasp_utils import *
+from myutils import *
+from datetime import datetime
 
-def get_data(listofstations, event, model, options, maxnbsta=3, provider="resif"):
+def get_data(listofstations, event, model, options, maxnbsta=3, provider="rasp"):
     allsta={}
     arrtimes={}
     alltraces=Stream()
@@ -46,7 +48,7 @@ def get_data(listofstations, event, model, options, maxnbsta=3, provider="resif"
         arrivals = model.get_travel_times(source_depth_in_km=event.depth, distance_in_degree=sta.epidist_deg, phase_list=my_phase_list)
         arrtimes[sta]=[]
         for arr in arrivals:
-            arrtimes[sta].append((arr.name,TIMESTAMP_TO_DATETIME(event.oritime+arr.time)))
+            arrtimes[sta].append((arr.name,datetime.fromtimestamp(event.oritime+arr.time+0.05)))
 
         # If if local mseed file does not exist or option "force" is True, query data and save miniseed data file
         # -----------------------
