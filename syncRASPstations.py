@@ -14,7 +14,10 @@ content=r.text
 
 j=json.loads(content)
 
+#print type(j['Inventory']['network'][0])
+#print j['Inventory']['network'][0]
 net=j['Inventory']['network'][0]
+#print j['Inventory']['network'][1]
 #print net['code']
 #print net['restricted']
 #print net['shared']
