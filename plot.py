@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.dates as dates
 from datetime import datetime, timedelta
-
-print
+import os
 
 def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options, DATADIR):
     print "plot with matplotlib ..."
@@ -40,31 +39,44 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
     
     print
     i=0
+    from obspy import read_inventory, Stream
     for trace in alltraces:
         print "== Process trace %s" % trace
         tr=trace.stats
 
-        if (tr.station=='R9F1B'):
-            from obspy import read_inventory, Stream
-            import os
-            inv = read_inventory(os.path.expanduser('./R9F1B.xml'))
-            tr_acc=trace.copy()
-            mystream = Stream(traces=[tr_acc])
- 
+        try:
+            myinv = read_inventory(os.path.expanduser('./responses/%s.xml' % tr.station))
+
+            tr_copy=trace.copy()
+            mystream = Stream(traces=[tr_copy])
+            mystream1=mystream.copy()
             mystream2=mystream.copy()
-            mystream.attach_response(inv)
-            mystream.remove_response(output='ACC')
-            mystream2.attach_response(inv)
-            mystream2.remove_response(output='DISP')
+            mystream3=mystream.copy()
+    
+            mystream1.attach_response(myinv)
+            mystream1.remove_response(output='ACC')
+            mystream2.attach_response(myinv)
+            mystream2.remove_response(output='VEL')
+            mystream3.attach_response(myinv)
+            mystream3.remove_response(output='DISP')
 
             print "<<<<<<<"
-            for mytrace in mystream:
-                print('Channel %s PGA: %.4f m/s/s (%.3f mg)' % (mytrace.stats.channel, max(abs(mytrace.data)), max(abs(mytrace.data))/9.81*1000))
-            for mytrace in mystream:
-                print('Channel %s DISP: %.3f micrometers' % (mytrace.stats.channel, max(abs(mytrace.data))/9.81*1000000))
+            for mytrace in mystream1:
+                print('Station %s PGA: %.4f m/s/s (%.3f mg)' % (mytrace.stats.station, max(abs(mytrace.data)), max(abs(mytrace.data))/9.81*1000))
+            for mytrace in mystream2:
+                print('Station %s PGV: %.3f micrometers/s' % (mytrace.stats.station, max(abs(mytrace.data))*1000000))
+            for mytrace in mystream3:
+                print('Station %s PGD: %.3f micrometers' % (mytrace.stats.station, max(abs(mytrace.data))*1000000))
             print "<<<<<<<"
 
+        except:
+            print ("WARNING: no response file found for station %s" % tr.station)
+            print ("\tDownload response file via Rasp webservice")
+            print ("\tExample:  curl -k 'https://fdsnws.raspberryshakedata.com/fdsnws/station/1/query?network=AM&station=RDF31&level=resp&format=sc3ml' -o RDF31.xml")
+            pass
+           
 
+        print
         Xtime_min = trace.stats.starttime
         Xtime_max = trace.stats.endtime
         sampling_rate=trace.stats.sampling_rate
