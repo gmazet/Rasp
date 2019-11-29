@@ -33,14 +33,28 @@ def build_station_list(ev,provider="rasp"):
         LOCCODE="00"
         CHANNEL="SHZ"
         HOST=HOST7
-        RASP_STATIONBOOK="%s/stations_raspberryshake.txt" % DATADIR
+        #RASP_STATIONBOOK="%s/stations_raspberryshake.txt" % DATADIR
+        RASP_STATIONBOOK="./rasp.sta"
         print "RASP_STATIONBOOK=%s" % RASP_STATIONBOOK
         fsta=open(RASP_STATIONBOOK,'r')
+        """
         for line in fsta:
             sta=req_station()
             sta.lat,sta.lon,sta.elevation=float(line.split()[1]),float(line.split()[2]),float(line.split()[3])
             sta.get_epidist(ev.lat,ev.lon)
             sta.network, sta.name, sta.location, sta.channel, sta.slserver = NET,line.split()[0], LOCCODE,CHANNEL,HOST
+            ALLSTATIONS.append((sta.network, sta.name, sta.location, sta.channel, sta.lat, sta.lon, sta.elevation, sta.slserver,sta.epidist_deg,sta.azimuth))
+            i+=1
+        fsta.close()
+        """
+
+        for line in fsta:
+            if (line.startswith("#")):
+                continue
+            sta=req_station()
+            sta.lat,sta.lon,sta.elevation=float(line.split("|")[2]),float(line.split("|")[3]),float(line.split("|")[4])
+            sta.get_epidist(ev.lat,ev.lon)
+            sta.network, sta.name, sta.location, sta.channel, sta.slserver = NET,line.split("|")[1], LOCCODE,CHANNEL,HOST
             ALLSTATIONS.append((sta.network, sta.name, sta.location, sta.channel, sta.lat, sta.lon, sta.elevation, sta.slserver,sta.epidist_deg,sta.azimuth))
             i+=1
         fsta.close()
