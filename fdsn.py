@@ -36,12 +36,12 @@ def get_data(listofstations, event, model, options, maxnbsta=3, provider="rasp")
         if (event.depth<0):
             event.depth=1
         if (sta.epidist_deg<10):
-            my_phase_list=["P","Pg", "Pn", "Sn", "Sg", "PP"]
+            my_phase_list=["P","Pg", "Pn", "Sn", "Sg"]
         else:
             if (event.depth>50):
-                my_phase_list=["Pn", "Pg", "pP", "P", "PP", "PKP"]
+                my_phase_list=["Pn", "Pg", "pP", "P", "PKP"]
             else:
-                my_phase_list=["Pn", "Pg", "Sn", "Sg", "P", "PP", "PKP"]
+                my_phase_list=["Pn", "Pg", "Sn", "Sg", "P", "PKP"]
 
         print "	Distance: %.1f km ; %.2f  degrees" % (sta.epidist_km,sta.epidist_deg)
 
