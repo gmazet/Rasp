@@ -39,9 +39,9 @@ def get_data(listofstations, event, model, options, maxnbsta=3, provider="rasp")
             my_phase_list=["P","Pg", "Pn", "Sn", "Sg"]
         else:
             if (event.depth>50):
-                my_phase_list=["Pn", "Pg", "pP", "P", "PKP"]
+                my_phase_list=["Pn", "Pg", "pP", "P", "S", "PKP"]
             else:
-                my_phase_list=["Pn", "Pg", "Sn", "Sg", "P", "PKP"]
+                my_phase_list=["Pn", "Pg", "Sn", "Sg", "P", "S", "PKP"]
 
         print "	Distance: %.1f km ; %.2f  degrees" % (sta.epidist_km,sta.epidist_deg)
 
@@ -64,14 +64,11 @@ def get_data(listofstations, event, model, options, maxnbsta=3, provider="rasp")
                 continue
 
             # First arrival time
-            if (options.section): # IF section, all traces must start at the same time
-                AT=event.OTutc
+            if (len(arrivals)>0):
+                AT=event.OTutc+arrivals[0].time
             else:
-                if (len(arrivals)>0):
-                    AT=event.OTutc+arrivals[0].time
-                else:
-                    print ("    No theoretical wave found")
-                    AT=event.OTutc
+                print ("    No theoretical wave found")
+                AT=event.OTutc
 
             t1 = AT - BEFORE
             t2 = t1 + float(options.sig_length)
@@ -102,14 +99,11 @@ def get_data(listofstations, event, model, options, maxnbsta=3, provider="rasp")
         else:
             print "	Mseed file %s already exist. Don't write over" % outseedfile
             # First arrival time
-            if (options.section): # IF section, all traces must start at the same time
-                AT=event.OTutc
+            if (len(arrivals)>0):
+                AT=event.OTutc+arrivals[0].time
             else:
-                if (len(arrivals)>0):
-                    AT=event.OTutc+arrivals[0].time
-                else:
-                    print ("No theoretical wave found")
-                    AT=event.OTutc
+                print ("No theoretical wave found")
+                AT=event.OTutc
     
             t1 = AT - BEFORE
             t2 = t1 + float(options.sig_length)

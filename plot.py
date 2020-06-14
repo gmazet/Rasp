@@ -8,35 +8,11 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
     print "plot with matplotlib ..."
     mytitle="EVID %d - M%3.1f %s on %s (Lat: %.2f; Lon: %.2f; Z: %dkm)" % (ev.evid,ev.mag,ev.region,str(ev.OTutc)[0:21],ev.lat,ev.lon,ev.depth)
 
-    fig2=plt.figure(figsize=[12,8])
+    fig2=plt.figure(figsize=[11,5])
+    #fig, (ax1,ax2,ax3) = plt.subplots(3)
 
-    if (options.section):
-        from matplotlib.transforms import blended_transform_factory
-        alltraces.plot(fig=fig2, type='section', ev_coord=(ev.lat,ev.lon), dist_degree=True,  time_down=True, linewidth=.35, grid_linewidth=.25, offsetmin=0, recordlength=float(options.sig_length))
-        axes=fig2.get_axes()
-        ax=axes[0]
-        
-        transform = blended_transform_factory(ax.transData, ax.transAxes)
-        for tr in alltraces:
-            #print tr.stats.distance/1e6, tr.stats.station
-            ax.text(tr.stats.distance/1e6, 1.0, tr.stats.station, rotation=305, va="bottom", ha="center", transform=transform)
-        fig2.suptitle(mytitle,fontsize=11)
-    
-        fig2.tight_layout(pad=0.5,rect=(0,0,1,0.90))
-    
-        png="%s/%d.section.png" % (DATADIR,ev.evid)
-        plt.savefig(png)
-        plt.show()
-        exit()
 
-    else:
-        alltraces.plot(fig=fig2,automerge=False)
-        axes=fig2.get_axes()
-        XLIM=axes[0].get_xlim()
-        DX=(XLIM[1]-XLIM[0])*1440
-        NEWXLIM=((XLIM[0], XLIM[0] + float(options.sig_length)/60/1440))
 
-    
     print
     i=0
     from obspy import read_inventory, Stream
@@ -47,25 +23,27 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
         try:
             myinv = read_inventory(os.path.expanduser('./responses/%s.xml' % tr.station))
 
+            trace.attach_response(myinv)
+
             tr_copy=trace.copy()
             mystream = Stream(traces=[tr_copy])
-            mystream1=mystream.copy()
-            mystream2=mystream.copy()
-            mystream3=mystream.copy()
+            mystream_acc=mystream.copy()
+            mystream_vel=mystream.copy()
+            mystream_disp=mystream.copy()
     
-            mystream1.attach_response(myinv)
-            mystream1.remove_response(output='ACC')
-            mystream2.attach_response(myinv)
-            mystream2.remove_response(output='VEL')
-            mystream3.attach_response(myinv)
-            mystream3.remove_response(output='DISP')
+            #mystream_acc.attach_response(myinv)
+            mystream_acc.remove_response(output='ACC')
+            #mystream_vel.attach_response(myinv)
+            mystream_vel.remove_response(output='VEL')
+            #mystream_disp.attach_response(myinv)
+            mystream_disp.remove_response(output='DISP')
 
             print "<<<<<<<"
-            for mytrace in mystream1:
+            for mytrace in mystream_acc:
                 print('Station %s PGA: %.4f m/s/s (%.3f mg)' % (mytrace.stats.station, max(abs(mytrace.data)), max(abs(mytrace.data))/9.81*1000))
-            for mytrace in mystream2:
+            for mytrace in mystream_vel:
                 print('Station %s PGV: %.3f micrometers/s' % (mytrace.stats.station, max(abs(mytrace.data))*1000000))
-            for mytrace in mystream3:
+            for mytrace in mystream_disp:
                 print('Station %s PGD: %.3f micrometers' % (mytrace.stats.station, max(abs(mytrace.data))*1000000))
             print "<<<<<<<"
 
@@ -75,8 +53,22 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
             print ("\tExample with Raspberryshake webservice: curl -k 'https://fdsnws.raspberryshakedata.com/fdsnws/station/1/query?network=AM&station=RDF31&level=resp&format=sc3ml' -o RDF31.xml")
             pass
            
+        if (options.output=='vel'):
+            print 'Plot velocity'
+            trace=mystream_vel[0]
+        elif (options.output=='disp'):
+            print 'Plot displacement'
+            trace=mystream_disp[0]
+        else:
+            print 'Plot raw data'
 
-        print
+        trace.plot(fig=fig2,automerge=False)
+        axes=fig2.get_axes()
+
+        XLIM=axes[0].get_xlim()
+        DX=(XLIM[1]-XLIM[0])*1440
+        NEWXLIM=((XLIM[0], XLIM[0] + float(options.sig_length)/60/1440))
+
         Xtime_min = trace.stats.starttime
         Xtime_max = trace.stats.endtime
         sampling_rate=trace.stats.sampling_rate
@@ -94,16 +86,36 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
         plt.setp(labelx, rotation=30, fontsize=9)
 
         Ymax=min (max(trace.data)*1.01,int(options.ampmax)) # 5000 max
-        ystep=max ((int(Ymax/1000)+1)*1000/2,100)
-        Ymaxunit=len(str(int(Ymax)))
-        Ymaxsize=str(int(Ymax))[0]
-        ystep=int(Ymaxsize)*pow(10,(int(Ymaxunit)-1)) 
-        axes[i].set_ylim(-Ymax,Ymax)
-        loc = ticker.MultipleLocator(base=ystep) # this locator puts ticks at regular intervals
-        axes[i].yaxis.set_major_locator(loc)
+        print "Ymax=",Ymax
+        ##ystep=max ((int(Ymax/1000)+1)*1000/2,100)
+        ##print "Ystep=",ystep
+        ##Ymaxunit=len(str(int(Ymax)))
+        ##Ymaxsize=str(int(Ymax))[0]
+        #ystep=int(Ymaxsize)*pow(10,(int(Ymaxunit)-1)) 
+        ##print "Ystep=",ystep
+        #axes[i].set_ylim(-Ymax,Ymax)
+        #loc = ticker.MultipleLocator(base=ystep) # this locator puts ticks at regular intervals
+        #axes[i].yaxis.set_major_locator(loc)
         labely = axes[i].get_yticklabels()
         plt.setp(labely, fontsize=9)
 
+        #Ymax1=min (max(alltraces[0].data)*1.01,int(options.ampmax)) # 5000 max
+        #Ymax2=max(alltraces[1].data)*1.01
+        #Ymax3=min (max(alltraces[2].data)*1.01,int(options.ampmax)) # 5000 max
+        #print Ymax1, Ymax2, Ymax3
+        #Ymax=Ymax2
+
+        #ystep=max ((int(Ymax/1000)+1)*1000/2,100)
+        #Ymaxunit=len(str(int(Ymax)))
+        #Ymaxsize=str(int(Ymax))[0]
+        #ystep=int(Ymaxsize)*pow(10,(int(Ymaxunit)-1)) 
+        #axes[i].set_ylim(-Ymax,Ymax)
+        #loc = ticker.MultipleLocator(base=ystep) # this locator puts ticks at regular intervals
+        #axes[i].yaxis.set_major_locator(loc)
+        #labely = axes[i].get_yticklabels()
+        #plt.setp(labely, fontsize=9)
+
+ 
         arrivals = model.get_travel_times(source_depth_in_km=ev.depth, distance_in_degree=allsta[tr.station].epidist_deg, phase_list=phaseslist)
         arrtimes[tr.station]=[]
         for arr in arrivals:

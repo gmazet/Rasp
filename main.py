@@ -14,9 +14,9 @@ def MyOptParser(parser):
     parser.add_option("--ampmax", action="store", dest="ampmax", default=1000000.0, help="Maximum amplitude to show [1e+6]")
     parser.add_option("--nbsta", action="store", dest="maxnbsta", default=3, help="Nb stations to show [3]")
     parser.add_option("--force", action="store_true", dest="force", default=False, help="Force requesting data instead of reading local miniseed file")
-    parser.add_option("--section", action="store_true", dest="section", default=False, help="Section plot")
     parser.add_option("--mysta", action="store_true", dest="mysta", default=False, help="Request custom list of stations")
     parser.add_option("--provider", action="store", dest="provider", default="rasp", help="Data provider [rasp]")
+    parser.add_option("--output", action="store", dest="output", default="raw", help="Raw data (raw), Velocity (vel) or Displacement (disp) [raw]")
     (options, args) = parser.parse_args(args=None, values=None)
     return options
 
