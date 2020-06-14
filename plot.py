@@ -11,7 +11,7 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
     fig2=plt.figure(figsize=[11,5])
     #fig, (ax1,ax2,ax3) = plt.subplots(3)
 
-
+    axes=fig2.get_axes()
 
     print
     i=0
@@ -63,7 +63,11 @@ def matplotlib_plot(ev, phaseslist, allsta, arrtimes, alltraces, model, options,
             print 'Plot raw data'
 
         trace.plot(fig=fig2,automerge=False)
-        axes=fig2.get_axes()
+
+        print 'Plot spectrogram'
+        clip=[0.0,0.4]
+        ###pre_filt=[0.01,0.05,25,30]
+        trace.spectrogram(log=False, mult=8.0, wlen=5.0, per_lap=0.9, clip=clip)
 
         XLIM=axes[0].get_xlim()
         DX=(XLIM[1]-XLIM[0])*1440
